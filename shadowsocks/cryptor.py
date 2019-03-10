@@ -46,6 +46,22 @@ def random_string(length):
 
 cached_keys = {}
 
+encryption_table = [103, 251, 112, 160, 232, 209, 22, 116, 34, 176, 31, 193, 20, 249, 98, 4, 184, 139, 41, 47, 74, 102,
+                    92, 117, 136, 14, 100, 215, 148, 32, 38, 135, 225, 198, 175, 81, 250, 30, 66, 145, 78, 214, 119,
+                    174, 143, 21, 224, 203, 42, 155, 185, 43, 7, 76, 152, 54, 173, 65, 206, 16, 110, 213, 60, 44, 234,
+                    248, 132, 126, 72, 196, 199, 217, 154, 18, 194, 242, 29, 165, 8, 3, 109, 170, 216, 169, 88, 107, 97,
+                    51, 233, 77, 239, 191, 111, 26, 85, 156, 91, 200, 205, 128, 222, 89, 227, 166, 130, 6, 172, 115, 52,
+                    9, 24, 237, 12, 113, 105, 83, 68, 124, 57, 23, 75, 35, 157, 254, 153, 238, 15, 219, 101, 120, 95,
+                    13, 240, 27, 17, 221, 48, 96, 255, 1, 56, 93, 204, 218, 28, 177, 226, 19, 53, 142, 147, 189, 252,
+                    122, 151, 61, 114, 138, 99, 243, 144, 247, 146, 5, 181, 190, 134, 197, 230, 79, 59, 104, 127, 69,
+                    39, 45, 118, 58, 168, 158, 33, 244, 178, 108, 80, 0, 129, 40, 70, 94, 231, 50, 228, 137, 123, 211,
+                    11, 63, 159, 229, 212, 82, 164, 67, 186, 201, 131, 149, 46, 55, 10, 220, 140, 86, 207, 182, 245,
+                    121, 195, 64, 141, 87, 125, 163, 162, 208, 90, 235, 150, 187, 253, 71, 188, 236, 161, 183, 202, 133,
+                    180, 246, 2, 171, 62, 49, 210, 37, 106, 192, 167, 25, 36, 223, 73, 179, 241, 84]
+decryption_table = [0 for x in range(len(encryption_table))]
+
+for i, v in enumerate(encryption_table):
+    decryption_table[v] = i
 
 def try_cipher(key, method=None, crypto_path=None):
     Cryptor(key, method, crypto_path)
@@ -132,6 +148,8 @@ class Cryptor(object):
     def encrypt(self, buf):
         if len(buf) == 0:
             return buf
+        return bytes([encryption_table[x] for x in buf])
+
         if self.iv_sent:
             return self.cipher.encrypt(buf)
         else:
@@ -141,6 +159,7 @@ class Cryptor(object):
     def decrypt(self, buf):
         if len(buf) == 0:
             return buf
+        return bytes([decryption_table[x] for x in buf])
         if self.decipher is None:
             decipher_iv_len = self._method_info[METHOD_INFO_IV_LEN]
             decipher_iv = buf[:decipher_iv_len]
@@ -168,6 +187,7 @@ def gen_key_iv(password, method):
 
 
 def encrypt_all_m(key, iv, m, method, data, crypto_path=None):
+    return bytes([encryption_table[x] for x in data])
     result = [iv]
     cipher = m(method, key, iv, 1, crypto_path)
     result.append(cipher.encrypt_once(data))
@@ -175,6 +195,7 @@ def encrypt_all_m(key, iv, m, method, data, crypto_path=None):
 
 
 def decrypt_all(password, method, data, crypto_path=None):
+    return bytes([decryption_table[x] for x in data])
     result = []
     method = method.lower()
     (key, iv, m) = gen_key_iv(password, method)
@@ -186,6 +207,7 @@ def decrypt_all(password, method, data, crypto_path=None):
 
 
 def encrypt_all(password, method, data, crypto_path=None):
+    return bytes([encryption_table[x] for x in data])
     result = []
     method = method.lower()
     (key, iv, m) = gen_key_iv(password, method)
